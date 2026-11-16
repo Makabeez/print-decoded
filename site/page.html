@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Print, Decoded — what a Pacifica Print order really is</title>
+<meta name="description" content="Pacifica Print, explained like an options desk would: the checkpoint, the premium, the real liquidation line, and a planner built on 12,000+ hours of Pacifica mark-price data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --chart:#E6EFEE;      /* nautical chart paper */
+  --shoal:#CFE2E4;      /* shallow water tint */
+  --deep:#0F2C3F;       /* navy ink */
+  --ink2:#3F5A69;       /* secondary ink */
+  --teal:#13777A;       /* sea-glass: Print / premium */
+  --buoy:#E3A21A;       /* checkpoint marker */
+  --red:#A8323E;        /* loss / liquidation */
+  --line:#B3CACD;
+  --paper:#F5F9F8;
+  --display:'Bricolage Grotesque',system-ui,sans-serif;
+  --body:'Source Serif 4',Georgia,serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--chart);color:var(--deep);font-family:var(--body);font-size:19px;line-height:1.62;
+  background-image:repeating-linear-gradient(0deg,transparent 0 47px,rgba(15,44,63,.045) 47px 48px),repeating-linear-gradient(90deg,transparent 0 47px,rgba(15,44,63,.045) 47px 48px);}
+a{color:var(--teal);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--buoy);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding:0 22px}
+.wide{max-width:1040px;margin:0 auto;padding:0 22px}
+h1,h2,h3{font-family:var(--display);line-height:1.08;letter-spacing:-.01em;margin:0}
+h1{font-size:clamp(46px,9vw,104px);font-weight:800;letter-spacing:-.035em;line-height:.92}
+h2{font-size:clamp(30px,4.6vw,44px);font-weight:800;margin:0 0 18px;letter-spacing:-.02em}
+h3{font-size:22px;font-weight:600;margin:0 0 6px}
+p{margin:0 0 18px}
+.lede{font-size:clamp(20px,2.4vw,24px);line-height:1.5;color:var(--ink2);max-width:640px}
+section{padding:64px 0 24px}
+.num{font-family:var(--mono);font-feature-settings:"tnum";}
+small,.note{font-size:15px;color:var(--ink2);line-height:1.5}
+/* ---------- hero ---------- */
+header{padding:40px 0 8px}
+.byline{font-family:var(--display);font-size:16px;color:var(--ink2);margin:18px 0 0}
+.byline a{color:var(--deep)}
+.hero-figure{background:var(--paper);border:1.5px solid var(--deep);border-radius:4px;margin:30px 0 0;padding:18px 18px 12px;position:relative}
+.hero-figure svg{display:block;width:100%;height:auto}
+.hero-head{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.hero-head h3{font-size:18px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--display);font-size:14px;color:var(--ink2)}
+.sw{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px}
+.verdicts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.verdict{border-top:3px solid var(--deep);padding:10px 2px 0;font-size:16px;line-height:1.45}
+.verdict b{font-family:var(--display);font-size:18px;display:block}
+.verdict.print{border-color:var(--teal)}
+.controls-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:14px;font-family:var(--display);font-size:15px}
+input[type=range]{accent-color:var(--teal);width:200px;max-width:52vw}
+button{font-family:var(--display);font-size:15px;font-weight:600;background:var(--deep);color:var(--paper);border:0;border-radius:3px;padding:9px 14px;cursor:pointer}
+button.ghost{background:transparent;color:var(--deep);border:1.5px solid var(--deep)}
+/* ---------- identity ---------- */
+.identity{font-family:var(--display);font-size:clamp(24px,3.6vw,36px);font-weight:600;line-height:1.2;border-left:6px solid var(--teal);padding:4px 0 4px 20px;margin:28px 0}
+.panel{background:var(--paper);border:1.5px solid var(--deep);border-radius:4px;padding:20px}
+.panel svg{display:block;width:100%;height:auto}
+.seg{display:inline-flex;border:1.5px solid var(--deep);border-radius:3px;overflow:hidden}
+.seg button{background:transparent;color:var(--deep);border-radius:0;padding:7px 12px}
+.seg button[aria-pressed=true]{background:var(--deep);color:var(--paper)}
+label.ctl{display:flex;flex-direction:column;gap:4px;font-family:var(--display);font-size:14px;color:var(--ink2)}
+label.ctl output,label.ctl .val{font-family:var(--mono);color:var(--deep);font-size:15px}
+.ctl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px 20px;margin-bottom:16px;align-items:end}
+select,input[type=number]{font-family:var(--mono);font-size:16px;padding:7px 8px;border:1.5px solid var(--deep);border-radius:3px;background:#fff;color:var(--deep);width:100%}
+/* ---------- big stat strip (only once) ---------- */
+.findings{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1.5px solid var(--deep);border-bottom:1.5px solid var(--deep);margin-top:34px}
+.finding{padding:16px 16px 14px 0}
+.finding+.finding{border-left:1px solid var(--line);padding-left:16px}
+.finding .big{font-family:var(--display);font-weight:800;font-size:44px;line-height:1;letter-spacing:-.03em}
+.finding p{font-size:15.5px;line-height:1.45;margin:8px 0 0;color:var(--ink2)}
+/* ---------- planner ---------- */
+.planner{background:var(--deep);color:#E8F1F1;border-radius:4px;padding:24px}
+.planner h2{color:#fff}
+.planner label.ctl{color:#A9C4CA}
+.planner label.ctl output,.planner .val{color:#fff}
+.planner select,.planner input[type=number]{background:#173B52;color:#fff;border-color:#4E7385}
+.planner .seg{border-color:#A9C4CA}
+.planner .seg button{color:#E8F1F1}
+.planner .seg button[aria-pressed=true]{background:#E8F1F1;color:var(--deep)}
+.readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#2D5468;border:1px solid #2D5468;margin-top:6px}
+.ro{background:var(--deep);padding:14px 14px 12px}
+.ro .k{font-family:var(--display);font-size:14px;color:#A9C4CA}
+.ro .v{font-family:var(--mono);font-size:26px;line-height:1.15;margin:4px 0 2px;color:#fff}
+.ro .s{font-size:14px;color:#A9C4CA;line-height:1.4}
+.ro.warn .v{color:#F2A7AE}
+.ro.good .v{color:#7FD6CF}
+.verdict-box{margin-top:14px;padding:14px 16px;border-left:5px solid var(--buoy);background:#173B52;font-size:17px;line-height:1.5}
+.live{font-family:var(--display);font-size:13px;color:#A9C4CA;margin-left:8px}
+/* ---------- tables ---------- */
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:620px}
+td.l{white-space:nowrap}
+th{font-family:var(--display);font-weight:600;text-align:right;padding:8px 8px;border-bottom:1.5px solid var(--deep);font-size:14px;color:var(--ink2);vertical-align:bottom}
+td{font-family:var(--mono);text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);font-size:14.5px}
+th:first-child,td:first-child{text-align:left}
+td.l{font-family:var(--display)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.case{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;align-items:start}
+.ledger{font-family:var(--mono);font-size:14.5px;line-height:1.75;background:var(--paper);border:1.5px solid var(--deep);border-radius:4px;padding:14px 16px}
+.ledger div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dotted var(--line)}
+.ledger div.hl{color:var(--red);font-weight:500}
+.rules{counter-reset:r;list-style:none;padding:0;margin:0}
+.rules li{counter-increment:r;padding:14px 0 14px 46px;border-top:1px solid var(--line);position:relative}
+.rules li::before{content:counter(r);position:absolute;left:0;top:12px;font-family:var(--display);font-weight:800;font-size:28px;color:var(--teal)}
+.strat{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.strat > div{border-top:3px solid var(--deep);padding-top:10px}
+.strat p{font-size:17px}
+section.wrap,section.wide{padding-top:76px;padding-bottom:8px}
+.seg{align-self:flex-start}
+footer{padding:50px 0 70px;font-size:15px;color:var(--ink2)}
+.tag{display:inline-block;font-family:var(--display);font-size:13px;padding:2px 8px;border:1px solid currentColor;border-radius:20px;margin-left:6px}
+@media (max-width:760px){
+  body{font-size:18px}
+  .findings{grid-template-columns:1fr}
+  .finding+.finding{border-left:0;border-top:1px solid var(--line);padding-left:0}
+  .verdicts,.case,.strat,.readouts{grid-template-columns:1fr}
+  section.wrap,section.wide{padding-top:56px}
+  .ro .v{font-size:23px}
+  .planner{padding:18px 14px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="wide">
+  <h1>Print,<br>decoded.</h1>
+  <p class="lede" style="margin-top:22px">A Pacifica Print order looks like a limit order that pays you to wait. Under the hood it is an option you sell. Once you see it that way, every number in the order ticket starts to make sense.</p>
+  <p class="byline">By <a href="https://x.com/GeiserJoe2">Makabeez</a>, prop trader. Built on Pacifica's own mark-price history, <span id="span-dates">Jun 2025 – Nov 2026</span>.</p>
+
+  <figure class="hero-figure" aria-labelledby="hero-cap">
+    <div class="hero-head">
+      <h3 id="hero-cap">BTC on 15 November 2026, one 24-hour Print cycle (00:00 → 24:00 UTC)</h3>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--deep)"></i>BTC mark, 5-min</span>
+        <span><i class="sw" style="background:var(--red);height:2px"></i>Your target</span>
+        <span><i class="sw" style="background:var(--buoy);height:8px;width:8px;border-radius:50%"></i>Checkpoint</span>
+      </div>
+    </div>
+    <svg id="hero" viewBox="0 0 1000 380" role="img" aria-label="BTC price path on 15 November 2026 with a target line and the 24-hour checkpoint"></svg>
+    <div class="controls-row">
+      <label for="heroD">Target below the open: <output id="heroDv" class="num">3.0%</output></label>
+      <input id="heroD" type="range" min="0.5" max="4" step="0.1" value="3">
+      <button id="replay" class="ghost">Replay the day</button>
+    </div>
+    <div class="verdicts">
+      <div class="verdict" id="vLimit"></div>
+      <div class="verdict print" id="vPrint"></div>
+    </div>
+  </figure>
+
+  <div class="findings">
+    <div class="finding"><div class="big" id="f1">50%</div><p>of the times price touches your target during a cycle, the Print does not fill. Across 15 Print products, the ratio barely moves. There's a 100-year-old reason for that.</p></div>
+    <div class="finding"><div class="big">½</div><p>On a max-leverage Print, the liquidation buffer you actually have at the checkpoint can be about half what the docs formula shows. A real ZEC order proves it.</p></div>
+    <div class="finding"><div class="big" id="f3">0.45–0.78×</div><p>What five real Print premiums paid, compared with a textbook fair price at the market's own 7-day volatility. Know what vol you're selling.</p></div>
+  </div>
+</header>
+
+<main>
+<section class="wrap" id="identity">
+  <h2>One sentence to remember</h2>
+  <p>Pacifica describes Print simply: pick a target, lock a deposit, get paid every cycle, and fill only if the market is past your target <em>at the end of the cycle</em>. Now look at what you're actually promising.</p>
+  <p>If the checkpoint mark is below your Print Long target, you buy at the target anyway. You start the position already down by the gap, times your leverage. If it's above, nothing happens and you keep the premium. That payoff has a name.</p>
+  <div class="identity">A Print Long is a put you sold, struck at your target, expiring at the checkpoint. A Print Short is a call you sold.</div>
+  <p>The Print pool is the buyer. The "yield" is the option premium. Leverage is just how many options you sold. And because your loss stops at your deposit plus premium, it's really a put <em>spread</em>: the cap is a second put you're long, struck at your liquidation price.</p>
+
+  <div class="panel" style="margin-top:26px">
+    <div class="ctl-grid">
+      <label class="ctl">Direction
+        <span class="seg" role="group" aria-label="Direction"><button data-side="long" aria-pressed="true">Long</button><button data-side="short" aria-pressed="false">Short</button></span>
+      </label>
+      <label class="ctl">Target distance <output id="pdV">3.0%</output><input id="pd" type="range" min="0.5" max="10" step="0.5" value="3"></label>
+      <label class="ctl">Leverage <output id="plV">10×</output><input id="pl" type="range" min="1" max="40" step="1" value="10"></label>
+      <label class="ctl">Premium for this cycle <output id="ppV">0.30% of deposit</output><input id="pp" type="range" min="0" max="3" step="0.05" value="0.3"></label>
+    </div>
+    <div class="legend" id="payLegend" style="margin-bottom:6px"></div>
+    <svg id="payoff" viewBox="0 0 1000 420" role="img" aria-label="Print payoff at the checkpoint versus the final mark price"></svg>
+    <p class="note" style="margin:10px 0 0">Profit or loss at the checkpoint, as % of your deposit, against where the mark price finishes. Your Print and a plain short option with the same strike and premium are the same line until the liquidation cap.</p>
+  </div>
+</section>
+
+<section class="wrap" id="half">
+  <h2>Why half your touches vanish</h2>
+  <p>A limit order fills the moment the market touches your price. A Print only looks once, at the checkpoint. How much does that cost in fills? I ran every 24-hour window on Pacifica's hourly mark candles, starting at every hour, for every Print market, and on BTC for the 7-day and 30-day cycles too.</p>
+  <div class="panel">
+    <svg id="scatter" viewBox="0 0 1000 560" role="img" aria-label="Scatter of intraday touch rate versus checkpoint fill rate for every Print product and distance"></svg>
+    <p class="note" style="margin:10px 0 0">Each dot is one product, side and target distance. Across the axis: how often a limit order at that price would have filled within the cycle. Up: how often a Print filled at the checkpoint. The dots sit on the "half" line, not the "same" line.</p>
+  </div>
+  <p style="margin-top:22px">That's the reflection principle from probability. If a price wanders without a trend, for every path that touches your target and ends beyond it, there's a mirror-image path that touches it and comes back. So the chance of <em>ending</em> past a level is about half the chance of <em>touching</em> it. Pacifica's data lands almost exactly on it: median fill-to-touch ratio <b class="num" id="ratio">0.50</b>.</p>
+  <p>The practical reading: the premium is what the pool pays you to give up the bounces. Those are the dips a limit order would have caught and that recovered by the checkpoint, like the one above. If you'd have been happy to own those dips, price that in before calling the yield free.</p>
+</section>
+
+<section class="wide" id="planner-sec">
+  <div class="planner" id="planner">
+    <h2>Print planner<span class="live" id="liveTag">Data snapshot, 16 Nov 2026</span></h2>
+    <p style="color:#C9DCDF;max-width:720px">Pick the order you're considering. Fill and liquidation rates come from every historical cycle on Pacifica's mark price. Fair premium uses the market's last 30 days of realized volatility unless you change it. Paste the APY the app shows you to see the volatility you're selling.</p>
+    <div class="ctl-grid">
+      <label class="ctl">Market and cycle<select id="pkSel"></select></label>
+      <label class="ctl">Direction
+        <span class="seg" role="group" aria-label="Planner direction"><button data-pside="long" aria-pressed="true">Long</button><button data-pside="short" aria-pressed="false">Short</button></span>
+      </label>
+      <label class="ctl">Target distance <output id="kdV">3.0%</output><input id="kd" type="range" min="0" max="19" step="1" value="5"></label>
+      <label class="ctl">Leverage<select id="levSel"></select></label>
+      <label class="ctl">Deposit (USDC)<input id="dep" type="number" min="10" step="10" value="1000"></label>
+      <label class="ctl">APY the app quotes (optional)<input id="apy" type="number" min="0" step="1" placeholder="e.g. 120"></label>
+      <label class="ctl">Volatility for fair value <output id="volV">—</output><input id="vol" type="range" min="10" max="200" step="1" value="50"></label>
+    </div>
+    <div class="readouts" id="readouts"></div>
+    <div class="verdict-box" id="pVerdict"></div>
+    <p style="font-size:14px;color:#A9C4CA;margin:12px 0 0">History is not a forecast. Rates count overlapping cycles started at every hour; independent cycles in the sample: <span id="indep" class="num"></span>. Fair value is Black–Scholes on the capped payoff, which understates fat tails. APY is read as premium ÷ deposit, annualized.</p>
+  </div>
+</section>
+
+<section class="wrap" id="leverage">
+  <h2>Print leverage isn't the leverage you think</h2>
+  <p>The docs give the Print liquidation price as roughly <span class="num">target ÷ leverage</span> beyond your target. That's the point where your deposit plus premium is gone. But at the checkpoint your order turns into an ordinary perp position, and ordinary perps get liquidated earlier: when equity falls below maintenance margin, which on Pacifica is half the initial margin at the market's max leverage.</p>
+  <p>With nothing but the Print's own margin behind it, the line you really face is:</p>
+  <p class="num" style="font-size:16px;background:var(--paper);border:1.5px solid var(--deep);border-radius:4px;padding:12px 14px;overflow-x:auto">Long:&nbsp; L = (K − margin ÷ size) ÷ (1 − 1/(2·maxLev))<br>Short: L = (K + margin ÷ size) ÷ (1 + 1/(2·maxLev))</p>
+  <div class="case">
+    <div>
+      <h3>A real one: ZEC_24H Print Short</h3>
+      <p style="font-size:17px">Target 5.7% above the mark, 10× (the ZEC maximum). At the checkpoint ZEC sat at 1,216.84. The docs line was 1,269.0, so by the docs this order should have survived. It was liquidated. Plug in ZEC's 5% maintenance margin and the line moves to 1,208.6, just under where the mark finished. The formula explains it to the cent.</p>
+    </div>
+    <div class="ledger" aria-label="ZEC order arithmetic">
+      <div><span>Deposit</span><span>922.93</span></div>
+      <div><span>Premium paid (24h)</span><span>23.80</span></div>
+      <div><span>Target K</span><span>1,150.95</span></div>
+      <div><span>Size = 922.93×10 ÷ K</span><span>8.019 ZEC</span></div>
+      <div><span>Docs liquidation line</span><span>1,269.0</span></div>
+      <div class="hl"><span>Real line (5% maint.)</span><span>1,208.6</span></div>
+      <div class="hl"><span>Mark at checkpoint</span><span>1,216.84</span></div>
+      <div><span>Outcome</span><span>liquidated</span></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:26px">
+    <h3 style="font-size:18px">Buffer beyond your target at each market's max Print leverage</h3>
+    <svg id="bufchart" viewBox="0 0 1000 470" role="img" aria-label="Docs buffer versus real buffer at max Print leverage per market"></svg>
+    <p class="note" style="margin:8px 0 0">Light bar: what the docs formula implies. Dark bar: what an order faces at delivery with only its own margin. Spare USDC in a cross-margin account can push the real line out; an isolated or empty account can't.</p>
+  </div>
+  <p style="margin-top:22px">This bites hardest on long cycles. A 30-day BTC Print Long 3% below at 40× filled in <b class="num" id="m1fill"></b> of historical cycles, and the checkpoint mark was through the real liquidation line in <b class="num" id="m1liq"></b>. Most of those fills arrive already liquidated, because a month gives the market room to overshoot your target by more than 1.5%.</p>
+</section>
+
+<section class="wrap" id="cycles">
+  <h2>Same target, three cycles</h2>
+  <p>BTC is the only market with 7-day and 30-day cycles. Here's one idea, "buy BTC 3% lower", run through all three on history:</p>
+  <div class="scroll"><table id="cycTable"></table></div>
+  <p class="note" style="margin-top:8px">Liquidation = checkpoint mark through the real (maintenance-adjusted) line, standalone margin. The 30-day row rests on about 16 independent months, so treat it as a sketch.</p>
+  <p style="margin-top:18px">The longer cycle fills far more often and pays far more per payout. It also locks your deposit for the whole block, even if you cancel on day two, and it lets the market run further past your target before anyone checks. Lower leverage is how you pay for a longer cycle.</p>
+</section>
+
+<section class="wrap" id="premiums">
+  <h2>What five real premiums were worth</h2>
+  <p>Print quotes come from a signed request, so I can't scrape them. But five real orders sit in public Print history (they're the test fixtures of the open-source <a href="https://github.com/hypurrquant/perp-cli/pull/36">perp-cli</a> integration). For each, I solved for the volatility that makes a Black–Scholes price of the capped payoff equal the premium actually paid, then compared it with what the market had realized.</p>
+  <div class="scroll"><table id="ivTable"></table></div>
+  <p style="margin-top:18px">On BTC, the premium was close to fair: 33% implied against 33–35% realized. On ZEC and HYPE, it implied 60–91% while 7-day realized volatility was 92–110%. Five orders prove nothing about the pricing engine, and BS ignores fat tails in both directions. The point is the habit: <b>check the implied vol of your quote against recent realized vol before you lock a month of deposit</b>. The planner above does it for you.</p>
+</section>
+
+<section class="wide" id="plays">
+  <div class="wrap" style="padding:0"><h2>Three ways traders actually use it</h2></div>
+  <div class="strat">
+    <div>
+      <h3>Get paid to buy the dip you wanted</h3>
+      <p>If you'd place the limit order anyway, Print is the better-paid version for anyone who's fine missing intraday wicks. Set the target where you'd genuinely want the position, and size leverage so the real liquidation line is far beyond it.</p>
+    </div>
+    <div>
+      <h3>The Print strangle</h3>
+      <p>A Print Long below and a Print Short above on the same market: two premiums, and at most one side can fill per checkpoint. At 3% on BTC, neither side filled in <b class="num" id="strBTC"></b> of 24-hour cycles; on HYPE, <b class="num" id="strHYPE"></b>. That's a short strangle, so it loses on big moves either way.</p>
+    </div>
+    <div>
+      <h3>Get paid to take profit</h3>
+      <p>Holding a long? A Print Short above it works like a covered call: a fill delivers a short position into your main account at your target, offsetting the long there. Until then you collect premium. Try the netting with a $10 order first.</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" id="rules">
+  <h2>Rules of thumb</h2>
+  <ol class="rules">
+    <li>Treat the yield as option premium. It's big when the market is moving because that's when your target is most likely to be crossed.</li>
+    <li>Expect about half as many fills as a limit order at the same price. The missing half are the bounces.</li>
+    <li>On a fill, expect to start under water. You enter at the target even when the market has run past it; the average overshoot on fills is in the planner.</li>
+    <li>Real liquidation buffer ≈ 1/leverage − 1/(2 × market max leverage). At max Print leverage on a 10× market, that's 5.3%, not 10%.</li>
+    <li>Longer cycle, lower leverage. A month lets the market overshoot by a lot before the only check that counts.</li>
+    <li>Cancelling takes effect at the next checkpoint. Pick cycle length for how long you can live with locked capital.</li>
+  </ol>
+</section>
+
+<section class="wrap" id="method">
+  <h2>How this was measured</h2>
+  <p style="font-size:17px">Price data: Pacifica mark-price candles, 1-hour (<span class="num">GET /api/v1/kline/mark</span>), from each market's first candle to 16 Nov 2026; the hero uses 5-minute candles. A cycle starts at every hour; the target is set from the opening mark; "touch" uses the cycle's hourly low or high; "fill" and "liquidation" use the closing mark at the checkpoint, as Print does. Products and limits: <span class="num">GET /api/v1/game/config</span>. Maintenance margin: ½ × 1/maxLeverage per the Pacifica liquidation docs, maxLeverage from <span class="num">GET /api/v1/info</span>. Premiums: five orders from public <span class="num">/game/history</span> data. Fair value: Black–Scholes on the capped put (or call) spread at the volatility shown. Not financial advice; Print can lose your whole deposit. Code and data to rebuild every number: <a href="https://github.com/Makabeez/print-decoded">github.com/Makabeez/print-decoded</a> (<span class="num">make reproduce</span>, public API only).</p>
+  <p style="font-size:17px">Sources: <a href="https://docs.pacifica.fi/print.md">Print docs</a>, <a href="https://docs.pacifica.fi/print/margin-and-liquidation.md">Print margin &amp; liquidation</a>, <a href="https://docs.pacifica.fi/trading-on-pacifica/liquidations.md">Pacifica liquidations</a>, <a href="https://docs.pacifica.fi/print/specifications.md">Print specifications</a>.</p>
+</section>
+</main>
+
+<footer class="wrap">
+  Made by Makabeez for the Pacifica Educators Sprint. Find me on X as <a href="https://x.com/GeiserJoe2">@GeiserJoe2</a> and on GitHub as <a href="https://github.com/Makabeez">Makabeez</a>. Try Print at <a href="https://app.pacifica.fi">app.pacifica.fi</a>.
+</footer>
+
+<script id="ds" type="application/json">__DATA__</script>
+<script id="ex" type="application/json">__EXAMPLE__</script>
+<script>
+(()=>{
+const D=JSON.parse(document.getElementById('ds').textContent);
+const EX=JSON.parse(document.getElementById('ex').textContent);
+const P=D.products;
+const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=s=>document.querySelector(s);
+const NS='http://www.w3.org/2000/svg';
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const C={deep:css('--deep'),teal:css('--teal'),buoy:css('--buoy'),red:css('--red'),line:css('--line'),ink2:css('--ink2'),shoal:css('--shoal')};
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+const pct=(x,d=1)=>(x*100).toFixed(d)+'%';
+const fmt=(x,d=2)=>x.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+function fmtPrice(x){if(x>=1000)return fmt(x,0);if(x>=10)return fmt(x,2);if(x>=1)return fmt(x,3);return fmt(x,5);}
+// ---------- math ----------
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+const Ncdf=x=>0.5*(1+erf(x/Math.SQRT2));
+function bsPut(S,K,s,T){if(s<=0||T<=0)return Math.max(K-S,0);const v=s*Math.sqrt(T),d1=(Math.log(S/K)+0.5*v*v)/v,d2=d1-v;return K*Ncdf(-d2)-S*Ncdf(-d1);}
+function bsCall(S,K,s,T){return bsPut(S,K,s,T)+S-K;}
+function liqLine(side,K,dep,prem,lev,mm){const Q=dep*lev/K,M=dep+prem;return side==='long'?(K-M/Q)/(1-mm):(K+M/Q)/(1+mm);}
+function liqDocs(side,K,dep,prem,lev){const x=(dep+prem)*K/(lev*dep);return side==='long'?K-x:K+x;}
+function fairPremium(side,S,K,dep,lev,mm,sig,T){
+  // fixed point: premium raises margin -> moves cap
+  let p=0;for(let i=0;i<6;i++){const L=liqLine(side,K,dep,p,lev,mm),Q=dep*lev/K;
+    p=side==='long'?Q*(bsPut(S,K,sig,T)-bsPut(S,Math.max(L,1e-9),sig,T)):Q*(bsCall(S,K,sig,T)-bsCall(S,L,sig,T));}
+  return Math.max(p,0);}
+function impliedVol(side,S,K,dep,lev,mm,prem,T){
+  // solve sigma s.t. capped spread value = prem (cap uses actual prem)
+  const L=liqLine(side,K,dep,prem,lev,mm),Q=dep*lev/K;
+  const f=s=>side==='long'?Q*(bsPut(S,K,s,T)-bsPut(S,Math.max(L,1e-9),s,T)):Q*(bsCall(S,K,s,T)-bsCall(S,L,s,T));
+  if(f(5)<prem)return null;let lo=0.005,hi=5;for(let i=0;i<80;i++){const m=(lo+hi)/2;if(f(m)<prem)lo=m;else hi=m;}return (lo+hi)/2;}
+const days=pk=>pk.endsWith('_1M')?30:pk.endsWith('_7D')?7:1;
+const asset=pk=>pk.split('_')[0];
+const label=pk=>{const a=asset(pk);const nm=a==='XAU'?'GOLD (XAU)':a;return nm+' · '+(days(pk)===1?'24 hours':days(pk)===7?'7 days':'30 days');};
+
+// ---------- sizing ----------
+function fit(svg,hDesk,hMob){const w=Math.round(Math.max(300,svg.parentNode.getBoundingClientRect().width-(svg.parentNode.classList.contains('panel')||svg.parentNode.classList.contains('hero-figure')?40:0)));const H=w<600?hMob:hDesk;svg.setAttribute('viewBox',`0 0 ${w} ${H}`);svg.innerHTML='';return [w,H,w<600];}
+const redraws=[];let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>redraws.forEach(f=>f()),150);});
+const T=(attrs,parent,text,size,fam,weight)=>el('text',Object.assign({'font-family':fam||'Bricolage Grotesque','font-size':size||13,fill:C.ink2},weight?{'font-weight':weight}:{},attrs),parent,text);
+
+// ---------- hero ----------
+(function hero(){
+  const svg=$('#hero');const path=EX.path.slice(0,288);const S0=EX.S0;const t0=EX.start,t1=t0+86400000;
+  const close=path[path.length-1][3];const ys=path.flatMap(p=>[p[1],p[2]]);
+  const lo=Math.min(...ys,S0*0.955),hi=Math.max(...ys,S0*1.03);
+  let ln,tgt,tgtL,touchG,cpLine,cp,x,y,W,H,m,mob,first=true;
+  function build(){
+    [W,H,mob]=fit(svg,380,280);m={l:mob?40:54,r:mob?14:24,t:14,b:30};
+    x=t=>m.l+(t-t0)/(t1-t0)*(W-m.l-m.r);y=v=>m.t+(hi-v)/(hi-lo)*(H-m.t-m.b);
+    for(let k=-4;k<=3;k++){const v=S0*(1+k/100);if(v<lo||v>hi)continue;if(mob&&k%2)continue;
+      el('line',{x1:m.l,x2:W-m.r,y1:y(v),y2:y(v),stroke:k===0?C.ink2:C.line,'stroke-dasharray':k===0?'4 4':''},svg);
+      T({x:m.l-6,y:y(v)+4,'text-anchor':'end'},svg,(k>0?'+':'')+k+'%',12,'IBM Plex Mono');}
+    for(let h=0;h<=24;h+=6){T({x:x(t0+h*3600000),y:H-8,'text-anchor':h===0?'start':h===24?'end':'middle'},svg,String(h).padStart(2,'0')+':00',12);}
+    const band='M'+path.map(p=>x(p[0])+','+y(p[2])).join('L')+'L'+path.slice().reverse().map(p=>x(p[0])+','+y(p[1])).join('L')+'Z';
+    el('path',{d:band,fill:C.shoal,opacity:.9},svg);
+    ln=el('path',{d:'M'+path.map(p=>x(p[0]+150000)+','+y(p[3])).join('L'),fill:'none',stroke:C.deep,'stroke-width':mob?1.6:2.2,'stroke-linejoin':'round'},svg);
+    tgt=el('line',{x1:m.l,x2:W-m.r,stroke:C.red,'stroke-width':2},svg);
+    tgtL=T({x:W-m.r-4,'text-anchor':'end',fill:C.red},svg,'',14,null,600);
+    touchG=el('g',{},svg);
+    cpLine=el('line',{x1:x(t1),x2:x(t1),y1:m.t,y2:H-m.b,stroke:C.buoy,'stroke-width':2,'stroke-dasharray':'3 4'},svg);
+    cp=el('circle',{cx:x(t1),cy:y(close),r:mob?6:8,fill:C.buoy,stroke:C.deep,'stroke-width':2},svg);
+    update();
+  }
+  function update(){
+    const d=+$('#heroD').value/100;const K=S0*(1-d);$('#heroDv').textContent=(d*100).toFixed(1)+'%';
+    tgt.setAttribute('y1',y(K));tgt.setAttribute('y2',y(K));tgtL.setAttribute('y',y(K)-7);tgtL.textContent='Target $'+fmt(K,0);
+    touchG.innerHTML='';
+    const hit=path.find(p=>p[1]<=K);const fill=close<=K;const chg=close/S0-1;
+    if(hit){const tx=x(hit[0]+150000);el('circle',{cx:tx,cy:y(K),r:6,fill:'#fff',stroke:C.red,'stroke-width':3},touchG);
+      T({x:tx+10,y:y(K)+20,fill:C.red},touchG,'limit fills here',13);}
+    const ht=hit?new Date(hit[0]).toISOString().slice(11,16)+' UTC':null;
+    $('#vLimit').innerHTML=hit?`<b>Limit buy at −${(d*100).toFixed(1)}%: filled at ${ht}</b>You bought the dip at $${fmt(K,0)}. By midnight BTC was ${chg>=0?'+':''}${(chg*100).toFixed(2)}% on the day, so the position was up ${pct((close-K)/K,2)} before leverage.`:`<b>Limit buy at −${(d*100).toFixed(1)}%: never touched</b>The day's low was ${pct(Math.min(...path.map(p=>p[1]))/S0-1,2)}. No fill, no yield.`;
+    $('#vPrint').innerHTML=fill?`<b>Print Long at −${(d*100).toFixed(1)}%: filled at the checkpoint</b>The mark closed at or below $${fmt(K,0)}, so the order opened a long at the target.`:`<b>Print Long at −${(d*100).toFixed(1)}%: ${hit?'touched, not filled':'not filled'}</b>The checkpoint mark was $${fmt(close,0)}, above the target. The order rolls to a new target the same distance below, and the day's premium is already in your margin.`;
+  }
+  function animate(){
+    if(reduce)return;const len=ln.getTotalLength();
+    ln.style.transition='none';ln.style.strokeDasharray=len;ln.style.strokeDashoffset=len;cp.style.opacity=0;cpLine.style.opacity=0;touchG.style.opacity=0;
+    ln.getBoundingClientRect();
+    ln.style.transition='stroke-dashoffset 4.2s cubic-bezier(.4,0,.2,1)';ln.style.strokeDashoffset=0;
+    setTimeout(()=>{touchG.style.transition='opacity .4s';touchG.style.opacity=1;},1700);
+    setTimeout(()=>{cp.style.transition=cpLine.style.transition='opacity .5s';cp.style.opacity=1;cpLine.style.opacity=1;},4200);
+  }
+  $('#heroD').addEventListener('input',update);$('#replay').addEventListener('click',animate);
+  build();animate();redraws.push(build);
+})();
+
+// ---------- payoff ----------
+(function payoff(){
+  const svg=$('#payoff');let side='long';
+  document.querySelectorAll('[data-side]').forEach(b=>b.addEventListener('click',()=>{side=b.dataset.side;document.querySelectorAll('[data-side]').forEach(o=>o.setAttribute('aria-pressed',o===b));draw();}));
+  ['pd','pl','pp'].forEach(id=>$('#'+id).addEventListener('input',draw));
+  function draw(){
+    const [W,H,mob]=fit(svg,400,300);const m={l:mob?44:56,r:14,t:16,b:44};
+    const d=+$('#pd').value/100,lev=+$('#pl').value,pr=+$('#pp').value/100;
+    $('#pdV').textContent=(d*100).toFixed(1)+'%';$('#plV').textContent=lev+'×';$('#ppV').textContent=(pr*100).toFixed(2)+'% of deposit';
+    const K=1-(side==='long'?d:-d);
+    const xr=side==='long'?[-0.25,0.05]:[-0.05,0.25];
+    const loss=S=>side==='long'?lev*Math.max(K-S,0)/K:lev*Math.max(S-K,0)/K;
+    const f=r=>Math.max(pr-loss(1+r),-1),g=r=>pr-loss(1+r);
+    const yr=[-1.25,Math.max(0.15,pr+0.1)];
+    const X=r=>m.l+(r-xr[0])/(xr[1]-xr[0])*(W-m.l-m.r);const Y=v=>m.t+(yr[1]-v)/(yr[1]-yr[0])*(H-m.t-m.b);
+    for(let k=-12;k<=Math.floor(yr[1]*10);k+=(mob?4:2)){const vv=k/10;el('line',{x1:m.l,x2:W-m.r,y1:Y(vv),y2:Y(vv),stroke:k===0?C.deep:C.line,'stroke-width':k===0?1.4:1},svg);
+      T({x:m.l-6,y:Y(vv)+4,'text-anchor':'end'},svg,(vv*100).toFixed(0)+'%',12,'IBM Plex Mono');}
+    for(let k=Math.round(xr[0]*100);k<=Math.round(xr[1]*100);k+=(mob?10:5)){T({x:X(k/100),y:H-24,'text-anchor':'middle'},svg,(k>0?'+':'')+k+'%',12,'IBM Plex Mono');}
+    T({x:(W+m.l)/2,y:H-4,'text-anchor':'middle'},svg,mob?'Checkpoint mark vs. entry mark':'Checkpoint mark vs. mark when you placed the order',13);
+    const N=300;let dp='',dg='';for(let i=0;i<=N;i++){const r=xr[0]+(xr[1]-xr[0])*i/N;dp+=(i?'L':'M')+X(r)+','+Y(f(r));const gv=g(r);if(gv>=yr[0])dg+=(dg?'L':'M')+X(r)+','+Y(gv);}
+    const vline=(r,col,dash)=>{if(r<xr[0]||r>xr[1])return;el('line',{x1:X(r),x2:X(r),y1:m.t,y2:H-m.b,stroke:col,'stroke-width':1.8,'stroke-dasharray':dash},svg);};
+    vline(K-1,C.deep,'5 4');
+    vline(liqDocs(side,K,1,pr,lev)-1,C.red,'2 4');
+    vline(liqLine(side,K,1,pr,lev,1/100)-1,C.red,'9 4');
+    if(lev<=10)vline(liqLine(side,K,1,pr,lev,1/20)-1,C.red,'');
+    el('path',{d:dg,fill:'none',stroke:C.ink2,'stroke-width':2,'stroke-dasharray':'2 5'},svg);
+    el('path',{d:dp,fill:'none',stroke:C.teal,'stroke-width':4,'stroke-linejoin':'round'},svg);
+    T({x:side==='long'?W-m.r-6:m.l+8,y:Y(pr)-10,'text-anchor':side==='long'?'end':'start',fill:C.teal},svg,'keep the premium, order rolls',14,null,600);
+    $('#payLegend').innerHTML=`<span><i class="sw" style="background:${C.teal};height:4px"></i>Your Print</span><span><i class="sw" style="border-top:2px dotted ${C.ink2};height:0"></i>Plain short ${side==='long'?'put':'call'}</span><span><i class="sw" style="border-top:2px dashed ${C.deep};height:0"></i>Target</span><span><i class="sw" style="border-top:2px dotted ${C.red};height:0"></i>Docs liquidation</span><span><i class="sw" style="border-top:2px dashed ${C.red};height:0"></i>Real line on BTC</span>`+(lev<=10?`<span><i class="sw" style="background:${C.red};height:2px"></i>Real line on a 10×-max market</span>`:'');
+  }
+  draw();redraws.push(draw);
+})();
+
+// ---------- scatter ----------
+(function scatter(){
+  const svg=$('#scatter');let ratios=[];
+  function draw(){
+    const [W,H,mob]=fit(svg,460,340);const m={l:mob?40:52,r:14,t:14,b:46};
+    const X=v=>m.l+v*(W-m.l-m.r);const Y=v=>m.t+(1-v/0.6)*(H-m.t-m.b);
+    for(let k=0;k<=5;k++){const v=k/5;el('line',{x1:X(v),x2:X(v),y1:m.t,y2:H-m.b,stroke:C.line},svg);T({x:X(v),y:H-m.b+18,'text-anchor':'middle'},svg,(v*100).toFixed(0)+'%',12,'IBM Plex Mono');}
+    for(let k=0;k<=6;k+=(mob?2:1)){const v=k/10;el('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v),stroke:C.line},svg);T({x:m.l-6,y:Y(v)+4,'text-anchor':'end'},svg,(v*100).toFixed(0)+'%',12,'IBM Plex Mono');}
+    T({x:(W+m.l)/2,y:H-6,'text-anchor':'middle'},svg,'Limit order would have filled (touch rate) →',13);
+    T({x:m.l+8,y:m.t+14},svg,'↑ Print filled at the checkpoint',13);
+    el('line',{x1:X(0),y1:Y(0),x2:X(0.6),y2:Y(0.6),stroke:C.ink2,'stroke-width':1.5,'stroke-dasharray':'6 5'},svg);
+    T({x:X(0.42)+8,y:Y(0.42)+4},svg,'same as a limit order',13);
+    ratios=[];
+    for(const pk in P){const p=P[pk];for(const s of ['long','short'])p.d.forEach((d,i)=>{const t=p[s].touch[i],f=p[s].fill[i];if(t<0.01)return;el('circle',{cx:X(t),cy:Y(f),r:mob?2.6:3.4,fill:C.deep,opacity:.5},svg);if(t>0.05&&d<=0.05)ratios.push(f/t);});}
+    el('line',{x1:X(0),y1:Y(0),x2:X(1),y2:Y(0.5),stroke:C.teal,'stroke-width':2.5},svg);
+    T({x:X(1)-4,y:Y(0.12),'text-anchor':'end',fill:C.teal},svg,'teal line: half a limit order',14,null,600);
+    ratios.sort((a,b)=>a-b);$('#ratio').textContent=ratios[Math.floor(ratios.length/2)].toFixed(2);
+  }
+  draw();redraws.push(draw);
+})();
+
+// ---------- buffers ----------
+(function buffers(){
+  const svg=$('#bufchart');
+  const rows=Object.keys(D.printlev).map(a=>{const lev=D.printlev[a],mm=1/(2*D.maxlev[a]);return {a,lev,docs:1/lev,real:1-(1-1/lev)/(1-mm)};});
+  function draw(){
+    const rh=28;const [W,H,mob]=fit(svg,rows.length*rh+30,rows.length*rh+30);const m={l:mob?92:110,r:mob?96:120,t:4,b:26};
+    const X=v=>m.l+v/0.10*(W-m.l-m.r);
+    rows.forEach((r,i)=>{const y0=m.t+i*rh;
+      T({x:m.l-8,y:y0+rh*0.66,'text-anchor':'end',fill:C.deep},svg,(r.a==='XAU'?'GOLD':r.a)+' at '+r.lev+'×',13);
+      el('rect',{x:m.l,y:y0+4,width:X(r.docs)-m.l,height:rh-8,fill:C.shoal},svg);
+      el('rect',{x:m.l,y:y0+4,width:X(r.real)-m.l,height:rh-8,fill:C.deep},svg);
+      T({x:X(r.docs)+6,y:y0+rh*0.66},svg,pct(r.real,1)+' vs '+pct(r.docs,0),12,'IBM Plex Mono');
+    });
+    for(let k=0;k<=10;k+=(mob?5:2.5)){T({x:X(k/100),y:H-6,'text-anchor':'middle'},svg,k+'%',12,'IBM Plex Mono');}
+  }
+  draw();redraws.push(draw);
+})();
+
+// ---------- tables ----------
+function at(pk,side,d){const p=P[pk];let i=0,b=1e9;p.d.forEach((x,j)=>{if(Math.abs(x-d)<b){b=Math.abs(x-d);i=j;}});return i;}
+(function cycles(){
+  const t=$('#cycTable');let h='<tr><th>Cycle</th><th>Limit would touch</th><th>Print fills</th><th>Liquidated at 10×</th><th>Liquidated at 40×</th></tr>';
+  for(const pk of ['BTC_24H','BTC_7D','BTC_1M']){const i=at(pk,'long',0.03),s=P[pk].long;
+    h+=`<tr><td class="l">${days(pk)===1?'24 hours':days(pk)===7?'7 days':'30 days'}</td><td>${pct(s.touch[i])}</td><td>${pct(s.fill[i])}</td><td>${pct(s.liqTrue['10'][i])}</td><td>${pct(s.liqTrue['40'][i])}</td></tr>`;}
+  t.innerHTML=h;
+  const i=at('BTC_1M','long',0.03);$('#m1fill').textContent=pct(P.BTC_1M.long.fill[i],0);$('#m1liq').textContent=pct(P.BTC_1M.long.liqTrue['40'][i],0);
+  const nf=(pk)=>{const j=at(pk,'long',0.03);return pct(1-P[pk].long.fill[j]-P[pk].short.fill[j],0);};
+  $('#strBTC').textContent=nf('BTC_24H');$('#strHYPE').textContent=nf('HYPE_24H');
+})();
+(function ivs(){
+  const t=$('#ivTable');let h='<tr><th>Order</th><th>Target</th><th>Lev.</th><th>Premium APY</th><th>Implied vol</th><th>Realized 7d</th><th>Realized 30d</th><th>Paid vs fair</th><th>Outcome</th></tr>';
+  let lo=9,hi=0;
+  D.iv.forEach(r=>{lo=Math.min(lo,r.ratio);hi=Math.max(hi,r.ratio);
+    h+=`<tr><td class="l">${r.asset} ${r.side}<br><small>${r.date.slice(0,10)}</small></td><td>${pct(r.dist,1)}</td><td>${r.lev}×</td><td>${pct(r.apy_on_deposit,0)}</td><td>${pct(r.iv,0)}</td><td>${pct(r.rv7,0)}</td><td>${pct(r.rv30,0)}</td><td>${r.ratio.toFixed(2)}×</td><td class="l">${r.outcome.replace('user-ended','cancelled').replace('ended','ended')}</td></tr>`;});
+  t.innerHTML=h;$('#f3').textContent=lo.toFixed(2)+'–'+hi.toFixed(2)+'×';
+})();
+(function span(){const f=Math.min(...Object.values(P).map(p=>p.from)),tt=Math.max(...Object.values(P).map(p=>p.to));const o={month:'short',year:'numeric',timeZone:'UTC'};$('#span-dates').textContent=new Date(f).toLocaleDateString('en-GB',o)+' to '+new Date(tt).toLocaleDateString('en-GB',o);})();
+
+// ---------- planner ----------
+(function planner(){
+  const LEVS=[1,2,3,5,10,15,20,25,40];
+  const order=['BTC_24H','BTC_7D','BTC_1M','ETH_24H','SOL_24H','HYPE_24H','XRP_24H','ZEC_24H','ENA_24H','NEAR_24H','LIT_24H','SKHYNIX_24H','NVDA_24H','XAU_24H','CL_24H'];
+  const sel=$('#pkSel');order.forEach(pk=>{const o=document.createElement('option');o.value=pk;o.textContent=label(pk);sel.appendChild(o);});
+  let side='long';const live={price:{},rv:{}};
+  document.querySelectorAll('[data-pside]').forEach(b=>b.addEventListener('click',()=>{side=b.dataset.pside;document.querySelectorAll('[data-pside]').forEach(o=>o.setAttribute('aria-pressed',o===b));render();}));
+  function setupProduct(keepVol){
+    const pk=sel.value,a=asset(pk),p=P[pk];
+    const ls=$('#levSel');const cur=+ls.value||10;ls.innerHTML='';LEVS.filter(l=>l<=D.printlev[a]).forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l+'×';ls.appendChild(o);});
+    ls.value=LEVS.filter(l=>l<=D.printlev[a]).includes(cur)?cur:Math.min(10,D.printlev[a]);
+    const kd=$('#kd');kd.max=p.d.length-1;const want=+(kd.dataset.want||0.03);kd.value=at(pk,side,want);
+    if(!keepVol){const rv=live.rv[a]||P[a+'_24H'].rv30;$('#vol').value=Math.round(rv*100);}
+    $('#indep').textContent=P[pk].indep.toLocaleString('en-US');
+    render();
+  }
+  sel.addEventListener('change',()=>setupProduct(false));
+  $('#kd').addEventListener('input',e=>{e.target.dataset.want=P[sel.value].d[+e.target.value];render();});
+  ['levSel','dep','apy','vol'].forEach(id=>$('#'+id).addEventListener('input',render));
+  function ro(k,v,s,cls){return `<div class="ro ${cls||''}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;}
+  function render(){
+    const pk=sel.value,a=asset(pk),p=P[pk],i=+$('#kd').value,d=p.d[i],lev=+$('#levSel').value,dep=Math.max(10,+$('#dep').value||10);
+    const mm=D.mm[a],T=days(pk)/365,S=live.price[a]||P[a+'_24H'].last,sig=+$('#vol').value/100;
+    $('#kdV').textContent=(d*100).toFixed(1)+'%';$('#volV').textContent=(sig*100).toFixed(0)+'% a year';
+    const K=side==='long'?S*(1-d):S*(1+d);const s=p[side];
+    const apyIn=parseFloat($('#apy').value);const quoted=isFinite(apyIn)&&apyIn>0?apyIn/100*dep*days(pk)/365:null;
+    const fair=fairPremium(side,S,K,dep,lev,mm,sig,T);
+    const prem=quoted!=null?quoted:fair;
+    const Lr=liqLine(side,K,dep,prem,lev,mm),Ld=liqDocs(side,K,dep,prem,lev);
+    const histCost=s.pay[i]*lev*dep; // average option payout per cycle, $
+    const fairApy=fair/dep*365/days(pk),histApy=s.pay[i]*lev*365/days(pk);
+    const lt=s.liqTrue[String(lev)]?s.liqTrue[String(lev)][i]:null,ldv=s.liqDocs[String(lev)]?s.liqDocs[String(lev)][i]:null;
+    const cyc=days(pk)===1?'cycle':days(pk)===7?'weekly cycle':'monthly cycle';
+    let h='';
+    h+=ro('Target price',`$${fmtPrice(K)}`,`${side==='long'?'Below':'Above'} a mark of $${fmtPrice(S)}`);
+    h+=ro('Print fills at the checkpoint',pct(s.fill[i]),`of historical ${cyc}s. A limit order would have filled ${pct(s.touch[i])}.`);
+    h+=ro('When it fills, you start at',`−${pct(s.mtm[i]*lev,1)}`,`of deposit on average: the market overshoots your target by ${pct(s.mtm[i],2)} before the check.`,'warn');
+    h+=ro('Liquidated on delivery',lt==null?'—':pct(lt,2),`of ${cyc}s, standalone margin (docs formula: ${ldv==null?'—':pct(ldv,2)}).`,lt>0.02?'warn':'');
+    h+=ro('Real liquidation line',`$${fmtPrice(Lr)}`,`${pct(Math.abs(Lr/K-1),2)} past target. Docs line: $${fmtPrice(Ld)} (${pct(Math.abs(Ld/K-1),2)}).`);
+    h+=ro('Fair premium per '+cyc,`$${fmt(fair,2)}`,`${pct(fairApy,0)} APY at ${(sig*100).toFixed(0)}% vol. Full-history average payout: ${pct(histApy,0)} APY.`,'good');
+    $('#readouts').innerHTML=h;
+    let v='';
+    if(quoted!=null){
+      const iv=impliedVol(side,S,K,dep,lev,mm,quoted,T);const rv=live.rv[a]||P[a+'_24H'].rv30;
+      if(iv==null)v=`A ${apyIn}% APY is more than this payoff could be worth at any sensible volatility. Double-check the target and leverage you entered.`;
+      else{const r=iv/rv;v=`At ${apyIn}% APY you'd collect <b>$${fmt(quoted,2)}</b> per ${cyc}, which means you're selling volatility at <b>${pct(iv,0)}</b>. ${a==='XAU'?'Gold':a} realized <b>${pct(rv,0)}</b> over the last 30 days. `+
+        (r<0.85?`You're being paid noticeably less than the recent pace of the market. Use this order only if you want the ${side==='long'?'entry':'exit'} at $${fmtPrice(K)} anyway.`:r>1.15?`You're being paid more than the market's recent pace: as an option seller, that's the side you want, as long as the real liquidation line above leaves room.`:`That's roughly in line with how much the market has been moving, so the premium is fair-ish compensation for the risk of filling.`);}
+    }else{
+      v=`Enter the APY the app quotes for this exact order (market, cycle, target and leverage) to see the volatility it implies. Without it, the fair premium above is what the payoff is worth at ${(sig*100).toFixed(0)}% volatility.`;
+    }
+    $('#pVerdict').innerHTML=v;
+  }
+  setupProduct(false);
+  // live refresh (works when hosted outside the claude.ai sandbox; silently keeps the snapshot otherwise)
+  let liveOK=false;
+  async function liveRV(a){if(!liveOK||live.rv[a]!==undefined)return;live.rv[a]=null;
+    try{const q=await fetch(`https://api.pacifica.fi/api/v1/kline/mark?symbol=${a}&interval=1h&start_time=${Date.now()-721*3600000}`);const k=(await q.json()).data;const c=k.map(z=>+z.c);let s1=0,s2=0,n=0;for(let t=1;t<c.length;t++){const x=Math.log(c[t]/c[t-1]);s1+=x;s2+=x*x;n++;}
+      if(n>200){const mu=s1/n;live.rv[a]=Math.sqrt(s2/n-mu*mu)*Math.sqrt(24*365);if(asset(sel.value)===a)setupProduct(false);}}catch(e){}}
+  sel.addEventListener('change',()=>liveRV(asset(sel.value)));
+  setTimeout(async()=>{
+    try{const ctl=new AbortController();setTimeout(()=>ctl.abort(),6000);
+      const r=await fetch('https://api.pacifica.fi/api/v1/info/prices',{signal:ctl.signal});const j=await r.json();
+      j.data.forEach(x=>{live.price[x.symbol]=+x.mark;});liveOK=true;
+      $('#liveTag').textContent='Live mark price and 30-day vol from Pacifica';render();liveRV(asset(sel.value));
+    }catch(e){}
+  },800);
+})();
+})();
+</script>
+</body>
+</html>
